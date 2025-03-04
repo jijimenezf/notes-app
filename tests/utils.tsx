@@ -14,7 +14,7 @@ const createWrapper = () => {
     },
   });
   // eslint-disable-next-line react/display-name
-  return ({ children }) => (
+  return ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>
       <Toaster />
       {children}
@@ -22,7 +22,7 @@ const createWrapper = () => {
   );
 };
 
-export const renderWithAppContext = (ui) => {
+export const renderWithAppContext = (ui: React.ReactNode) => {
   render(ui, { wrapper: createWrapper() });
 };
 

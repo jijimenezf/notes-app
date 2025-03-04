@@ -1,4 +1,4 @@
-/*import { screen, waitFor, act } from "@testing-library/react";
+import { screen, waitFor, act } from "@testing-library/react";
 import { delay, http, HttpResponse } from "msw";
 import server from "../../../tests/mock-api-server";
 import userEvent from "@testing-library/user-event";
@@ -16,7 +16,7 @@ describe("DeleteNoteButton", () => {
   });
 
   it("shows a loading icon as the note is being deleted", async () => {
-    renderWithAppContext(<DeleteNoteButton />);
+    renderWithAppContext(<DeleteNoteButton id={1} />);
 
     // Get the dummy note and delete it
     const deleteButton = screen.getByRole("button", {
@@ -43,7 +43,7 @@ describe("DeleteNoteButton", () => {
   });
 
   it("allows deleting a note", async () => {
-    renderWithAppContext(<DeleteNoteButton />);
+    renderWithAppContext(<DeleteNoteButton id={1} />);
 
     // Get the dummy note and delete it
     const deleteButton = screen.getByRole("button", {
@@ -63,7 +63,7 @@ describe("DeleteNoteButton", () => {
         return HttpResponse.json(null, { status: 500 });
       })
     );
-    renderWithAppContext(<DeleteNoteButton />);
+    renderWithAppContext(<DeleteNoteButton id={1} />);
 
     // Get the dummy note and delete it
     const deleteButton = screen.getByRole("button", {
@@ -75,4 +75,4 @@ describe("DeleteNoteButton", () => {
       "There was an error deleting the note"
     );
   });
-});*/
+});
