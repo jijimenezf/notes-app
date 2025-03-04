@@ -2,21 +2,21 @@ import { useState } from "react";
 import axios from "axios";
 import { FiLoader } from "react-icons/fi";
 import { RiDeleteBin6Line } from "react-icons/ri";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
-type Status = {
-  type: "success" | "error";
-  message: string;
-};
+const DeleteNoteButton = ({ id }: { id: string }) => {
+  const queryClient = useQueryClient();
 
-const DeleteNoteButton = ({ id }: { id: number }) => {
-  const [isPending, setIsPending] = useState(false);
-  const [result, setResult] = useState<Status>({
-    type: "error",
-    message: "",
-  });
+  const mutation = useMutation({
+    mutationFn: deleteNote,
+    onSuccess: (data, variables, context) => {
+      queryClient.invalidateQueries({ queryKey: ['noteListData'] });
+    },
+  })
+
 
   async function deleteNote() {
-    setIsPending(true);
     try {
       const { data, status } = await axios.delete(
         `http://localhost:3000/notes/${id}`,
@@ -27,37 +27,29 @@ const DeleteNoteButton = ({ id }: { id: number }) => {
           },
         }
       );
-      setResult({ type: "success", message: "Note successfully deleted" });
+      toast.success('Note successfully deleted', { id: 'notification' });
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        setResult({
-          type: "error",
-          message: "There was an error deleting the note",
-        });
+        toast.error("There was an error deleting the note", { id: 'notification' });
       }
     }
-    setIsPending(false);
   }
 
   function handleSubmit(e: React.MouseEvent) {
     e.preventDefault();
-    deleteNote();
+    mutation.mutate();
   }
 
   return (
     <>
-      {result && <div role="status">{result.message}</div>}
-      {isPending && <p>Loading ...</p>}
-      <button disabled={isPending} role="button" onClick={handleSubmit}>
-        {isPending ? (
-          <p>
+      <button disabled={mutation.isPending} role="button" onClick={handleSubmit}>
+        {mutation.isPending ? (
+          <p aria-label="Deleting note">
             <FiLoader />
-            Deleting note
           </p>
         ) : (
-          <p>
+          <p aria-label="Delete note">
             <RiDeleteBin6Line />
-            Delete note
           </p>
         )}
       </button>

@@ -1,4 +1,4 @@
-/*import { screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { renderWithAppContext } from "../../../tests/utils";
 import PinNoteButton from "../PinNoteButton";
 
@@ -20,4 +20,4 @@ describe("PinNoteButton", () => {
       })
     ).toBeInTheDocument();
   });
-});*/
+});

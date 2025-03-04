@@ -1,33 +1,43 @@
 import { useState } from "react";
 import axios from "axios";
-
-type Status = {
-  type: "success" | "error";
-  message: string;
-};
+import toast from "react-hot-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 type Note = {
   title: string;
   content: string;
 };
 
-type GetNoteResponse = {
-  data: Note[];
-};
+/*const configOptions: ToastOptions = {
+  duration: 4000,
+  position: "top-center",
+  style: {},
+  className: "",
+  ariaProps: {
+    role: "status",
+    "aria-live": "polite",
+  },
+  iconTheme: {
+    primary: "#000",
+    secondary: "#fff",
+  },
+};*/
 
 const AddNote = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [result, setResult] = useState<Status>({
-    type: "error",
-    message: "",
-  });
-  const [isPending, setIsPending] = useState(false);
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: submitNote,
+    onSuccess: (data, variables, context) => {
+      queryClient.invalidateQueries({ queryKey: ['noteListData'] });
+    },
+  })
 
   async function submitNote() {
-    setIsPending(true);
     try {
-      const { data, status } = await axios.post<Note>(
+      const {data, status} = await axios.post<Note>(
         "http://localhost:3000/notes",
         { title, content },
         {
@@ -37,41 +47,27 @@ const AddNote = () => {
           },
         }
       );
-      
-      if (status === 200) {
-        setResult({ type: "success", message: "Note successfully added" });
-        setTitle("");
-        setContent("");
-      }
+      setTitle("");
+      setContent("");
+      toast.success('Note successfully added', { id: 'notification' });
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        setResult({
-          type: "error",
-          message: "There was an error adding the note",
-        });
-      } else {
-        setResult({
-          type: "error",
-          message: error as string,
-        });
+        toast.error("There was an error adding the note", { id: 'notification' });
       }
     }
-    setIsPending(false);
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    submitNote();
+    mutation.mutate();
   }
 
   return (
     <>
-      {result && <div role="status">{result.message}</div>}
-      {isPending && <p>Loading ...</p>}
       <form onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="title">Title</label>
           <input
+            aria-label="Title"
             type="text"
             name="title"
             id="title"
@@ -80,18 +76,20 @@ const AddNote = () => {
           />
         </div>
         <div>
-          <label htmlFor="content">Content</label>
-          <input
-            type="textArea"
+          <textarea
+            aria-label="Content"
+            rows={6}
+            cols={25}
             name="content"
             id="content"
             value={content}
+            placeholder="Take a note..."
             onChange={(e) => setContent(e.target.value)}
           />
         </div>
         <div>
-          <button disabled={isPending} type="submit">
-            {isPending ? 'Adding note' : 'Add note'}
+          <button disabled={mutation.isPending} type="submit">
+            {mutation.isPending ? "Adding note" : "Add note"}
           </button>
         </div>
       </form>

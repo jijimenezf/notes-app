@@ -1,4 +1,4 @@
-/*import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import server from "../../../tests/mock-api-server";
 import userEvent from "@testing-library/user-event";
@@ -6,7 +6,7 @@ import { renderWithAppContext, waitOneTick } from "../../../tests/utils";
 import EditNote from "../EditNote";
 
 describe("EditNote", () => {
-  beforeEach(() => {
+ /* beforeEach(() => {
     server.use(
       http.put("http://localhost:3000/notes/:id", async ({ request }) => {
         const postedNote = await request.json();
@@ -109,5 +109,5 @@ describe("EditNote", () => {
 
     // Check the callback is NOT called
     expect(onSave).not.toHaveBeenCalled();
-  });
-});*/
+  });*/
+});

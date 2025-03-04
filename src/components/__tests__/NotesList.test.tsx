@@ -1,4 +1,4 @@
-/*import {
+import {
   screen,
   waitForElementToBeRemoved,
   within,
@@ -22,9 +22,14 @@ describe("Notes List", () => {
       );
       renderWithAppContext(<NotesList />);
 
-      await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
+      //await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
+      // Leverage Toaster
+      expect(await screen.getByRole("status")).toHaveTextContent(
+        "Loading..."
+      );
 
-      const notes = screen.getAllByRole("listitem");
+      //const notes = screen.getAllByRole("listitem");
+      const notes = await screen.findAllByRole("listitem");
       expect(notes.map((note) => note.textContent)).toEqual(["hello tests"]);
     });
 
@@ -56,9 +61,13 @@ describe("Notes List", () => {
       );
       renderWithAppContext(<NotesList />);
       await waitFor(() => {
-        expect(
+        /*expect(
           screen.getByText(/Request failed with status code 500/)
-        ).toBeInTheDocument();
+        ).toBeInTheDocument();*/
+        // Leverage Toaster
+        expect(screen.getByRole("status")).toHaveTextContent(
+          "There was an error loading the data"
+        );
       });
     });
 
@@ -68,16 +77,14 @@ describe("Notes List", () => {
           http.get("http://localhost:3000/notes", () => {
             return HttpResponse.json([
               { id: uuid(), content: "first" },
-              { id: uuid(), content: "second" },
+              { id: uuid(), content: "second"},
               { id: uuid(), content: "third" },
             ]);
           })
         );
         renderWithAppContext(<NotesList />);
 
-        await waitForElementToBeRemoved(() => screen.getByText(/loading/i));
-
-        const notes = screen.getAllByRole("listitem");
+        const notes = await screen.findAllByRole("listitem");
         expect(notes.map((note) => note.textContent)).toEqual([
           "third",
           "second",
@@ -201,9 +208,9 @@ describe("Notes List", () => {
       await userEvent.click(pinNoteButton);
 
       // Check the note is now pinned
-      const unpinButton = within(notes[0]).queryByRole("button", {
+      const unpinButton: HTMLButtonElement = within(notes[0]).queryByRole("button", {
         name: "Unpin note",
-      });
+      }) as HTMLButtonElement;
       expect(unpinButton).toBeInTheDocument();
 
       // Check users can unpin it
@@ -215,4 +222,4 @@ describe("Notes List", () => {
       ).toBeInTheDocument();
     });
   });
-});*/
+});
