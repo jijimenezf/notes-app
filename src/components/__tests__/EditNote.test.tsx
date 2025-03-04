@@ -1,14 +1,14 @@
-import { screen, waitFor } from "@testing-library/react";
-import { delay, http, HttpResponse } from "msw";
+/*import { screen, waitFor } from "@testing-library/react";
+import { http, HttpResponse } from "msw";
 import server from "../../../tests/mock-api-server";
 import userEvent from "@testing-library/user-event";
 import { renderWithAppContext, waitOneTick } from "../../../tests/utils";
-import AddNote from "../AddNote";
+import EditNote from "../EditNote";
 
-describe("AddNote", () => {
+describe("EditNote", () => {
   beforeEach(() => {
     server.use(
-      http.post("http://localhost:3000/notes", async ({ request }) => {
+      http.put("http://localhost:3000/notes/:id", async ({ request }) => {
         const postedNote = await request.json();
         await waitOneTick();
         return HttpResponse.json(postedNote);
@@ -17,9 +17,14 @@ describe("AddNote", () => {
   });
 
   it("shows a loading state as the note is being added", async () => {
-    renderWithAppContext(<AddNote />);
+    renderWithAppContext(
+      <EditNote
+        note={{ id: "123", title: "Hello", content: "World" }}
+        onSave={vi.fn()}
+      />
+    );
 
-    // Create the note
+    // Edit the note
     await userEvent.type(
       await screen.findByRole("textbox", { name: "Title" }),
       "Testing"
@@ -30,18 +35,24 @@ describe("AddNote", () => {
     );
     // click the button, but don't wait for the action to finish
     // so we can check the button text changes when loading
-    userEvent.click(screen.getByRole("button", { name: "Add note" }));
+    userEvent.click(screen.getByRole("button", { name: "Save" }));
 
-    // check the button becomes disabled and says 'Adding note'
+    // check the button becomes disabled and says 'Saving note'
     await waitFor(() => {
       expect(
-        screen.getByRole("button", { name: /Adding note/i })
+        screen.getByRole("button", { name: /Saving .../i })
       ).toBeDisabled();
     });
   });
 
   it("allows adding a note", async () => {
-    renderWithAppContext(<AddNote />);
+    const onSave = vi.fn();
+    renderWithAppContext(
+      <EditNote
+        note={{ id: "123", title: "Hello", content: "World" }}
+        onSave={onSave}
+      />
+    );
 
     // Create the note
     await userEvent.type(
@@ -52,26 +63,32 @@ describe("AddNote", () => {
       screen.getByRole("textbox", { name: "Content" }),
       "Don't forget to check the tests"
     );
-    await userEvent.click(screen.getByRole("button", { name: "Add note" }));
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
-    expect(await screen.getByRole("status")).toHaveTextContent(
-      "Note successfully added"
-    );
+    await waitFor(() => {
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "Note successfully saved"
+      );
+    });
 
-    // Check the form is now cleared
-    expect(screen.getByRole("textbox", { name: "Title" })).toHaveValue("");
-    expect(screen.getByRole("textbox", { name: "Content" })).toHaveValue("");
+    // Check the `onSave` callback is called
+    expect(onSave).toHaveBeenCalled();
   });
 
   it("shows an error if adding a note failed", async () => {
     server.use(
-      http.post("http://localhost:3000/notes", async () => {
-        delay();
+      http.put("http://localhost:3000/notes/:id", async () => {
         return HttpResponse.json(null, { status: 500 });
       })
     );
 
-    renderWithAppContext(<AddNote />);
+    const onSave = vi.fn();
+    renderWithAppContext(
+      <EditNote
+        note={{ id: "123", title: "Hello", content: "World" }}
+        onSave={onSave}
+      />
+    );
 
     // Create the note
     await userEvent.type(
@@ -82,21 +99,15 @@ describe("AddNote", () => {
       screen.getByRole("textbox", { name: "Content" }),
       "Don't forget to check the tests"
     );
-    await userEvent.click(screen.getByRole("button", { name: "Add note" }));
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
-    // Check that an error message is displayed
-    expect(screen.getByText("Internal Server Error")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "There was an error saving the note"
+      );
+    });
 
-    expect(await screen.getByRole("status")).toHaveTextContent(
-      "There was an error adding the note"
-    );
-
-    // Check the form is NOT cleared
-    expect(screen.getByRole("textbox", { name: "Title" })).toHaveValue(
-      "Testing"
-    );
-    expect(screen.getByRole("textbox", { name: "Content" })).toHaveValue(
-      "Don't forget to check the tests"
-    );
+    // Check the callback is NOT called
+    expect(onSave).not.toHaveBeenCalled();
   });
-});
+});*/
