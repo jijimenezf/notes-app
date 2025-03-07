@@ -11,10 +11,9 @@ const DeleteNoteButton = ({ id }: { id: string }) => {
   const mutation = useMutation({
     mutationFn: deleteNote,
     onSuccess: (data, variables, context) => {
-      queryClient.invalidateQueries({ queryKey: ['noteListData'] });
+      queryClient.invalidateQueries({ queryKey: ["noteListData"] });
     },
-  })
-
+  });
 
   async function deleteNote() {
     try {
@@ -27,10 +26,12 @@ const DeleteNoteButton = ({ id }: { id: string }) => {
           },
         }
       );
-      toast.success('Note successfully deleted', { id: 'notification' });
+      toast.success("Note successfully deleted", { id: "notification" });
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        toast.error("There was an error deleting the note", { id: 'notification' });
+        toast.error("There was an error deleting the note", {
+          id: "notification",
+        });
       }
     }
   }
@@ -41,8 +42,13 @@ const DeleteNoteButton = ({ id }: { id: string }) => {
   }
 
   return (
-    <>
-      <button disabled={mutation.isPending} role="button" onClick={handleSubmit}>
+    <div className="mt-6 flex items-center justify-center lg:justify-start">
+      <button
+        disabled={mutation.isPending}
+        role="button"
+        className="w-full rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:ring-gray-700 sm:w-auto"
+        onClick={handleSubmit}
+      >
         {mutation.isPending ? (
           <p aria-label="Deleting note">
             <FiLoader />
@@ -53,7 +59,7 @@ const DeleteNoteButton = ({ id }: { id: string }) => {
           </p>
         )}
       </button>
-    </>
+    </div>
   );
 };
 
