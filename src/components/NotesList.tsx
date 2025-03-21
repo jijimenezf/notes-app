@@ -13,7 +13,7 @@ type Note = {
 };
 
 const NotesList = () => {
-  const { isLoading, error, data, status } = useQuery<Note[] | undefined>({
+  const { isLoading, error, data, status } = useQuery<Note[]>({
     queryKey: ["noteListData"],
     queryFn: fetchNotes,
     initialData: [],
@@ -21,7 +21,7 @@ const NotesList = () => {
 
   async function fetchNotes() {
     try {
-      const { data, status } = await axios.get<Note[]>(
+      const { data } = await axios.get<Note[]>(
         "http://localhost:3000/notes",
         {
           headers: {
@@ -41,6 +41,7 @@ const NotesList = () => {
           id: "notification",
         });
       }
+      return [];
     } finally {
       toast.dismiss();
     }
@@ -48,6 +49,12 @@ const NotesList = () => {
 
   if (isLoading) {
     return toast.loading("Loading...", { id: "notification" });
+  }
+
+  if (error) {
+    return toast.error("There was an error loading the data", {
+      id: "notification",
+    });
   }
 
   return (
