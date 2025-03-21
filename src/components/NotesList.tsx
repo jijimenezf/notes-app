@@ -1,4 +1,3 @@
-import { useState } from "react";
 import AddNote from "./AddNote";
 import DeleteNoteButton from "./DeleteNoteButton";
 import PinNoteButton from "./PinNoteButton";
@@ -14,14 +13,13 @@ type Note = {
 };
 
 const NotesList = () => {
-  const [noteList, setNoteList] = useState<Note[]>([]);
-  const { isLoading, error, data } = useQuery({
+  const { isLoading, error, data, status } = useQuery<Note[] | undefined>({
     queryKey: ["noteListData"],
     queryFn: fetchNotes,
+    initialData: [],
   });
 
   async function fetchNotes() {
-    toast.loading("Loading...", { id: "notification" });
     try {
       const { data, status } = await axios.get<Note[]>(
         "http://localhost:3000/notes",
@@ -36,8 +34,7 @@ const NotesList = () => {
         .reverse()
         .filter((singleNote) => singleNote.is_pinned)
         .concat(data.filter((singleNote) => !singleNote.is_pinned));
-
-      setNoteList(sortedNotes);
+      return sortedNotes;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         toast.error("There was an error loading the data", {
@@ -47,6 +44,10 @@ const NotesList = () => {
     } finally {
       toast.dismiss();
     }
+  }
+
+  if (isLoading) {
+    return toast.loading("Loading...", { id: "notification" });
   }
 
   return (
@@ -63,33 +64,29 @@ const NotesList = () => {
 
         <div className="mt-6 flow-root">
           <div className="space-y-4 py-6 md:py-8">
-            <div>
+            {status === "success" && (
               <ul>
-                {noteList.length > 0 &&
-                  noteList.map((note) => (
-                    <li
-                      key={note.id}
-                      className="flex items-center justify-between py-4 border-4 border-gray-400 rounded-md my-5"
-                    >
-                      <div className="w-4 flex-1 pl-16">
-                        <h3 className="shrink-0 text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">
-                          {note.title}
-                        </h3>
-                        <p className="w-auto flex-1 text-base font-normal text-gray-500 dark:text-gray-400">
-                          {note.content}
-                        </p>
-                      </div>
-                      <div className="flex-1">
-                        <PinNoteButton
-                          id={note.id}
-                          is_pinned={note.is_pinned}
-                        />
-                        <DeleteNoteButton id={note.id} />
-                      </div>
-                    </li>
-                  ))}
+                {data.map((note) => (
+                  <li
+                    key={note.id}
+                    className="flex items-center justify-between py-4 border-4 border-gray-400 rounded-md my-5"
+                  >
+                    <div className="w-4 flex-1 pl-16">
+                      <h3 className="shrink-0 text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">
+                        {note.title}
+                      </h3>
+                      <p className="w-auto flex-1 text-base font-normal text-gray-500 dark:text-gray-400">
+                        {note.content}
+                      </p>
+                    </div>
+                    <div className="flex-1">
+                      <PinNoteButton id={note.id} is_pinned={note.is_pinned} />
+                      <DeleteNoteButton id={note.id} />
+                    </div>
+                  </li>
+                ))}
               </ul>
-            </div>
+            )}
           </div>
         </div>
       </div>
